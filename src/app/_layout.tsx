@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { HabitsProvider } from '@/context/HabitsContext';
 import { configurarManejadorNotificaciones } from '@/services/notifications';
 
+
+//crear un tema y exportarlo para usarlo en la app
 const tema = {
   dark: false,
   colors: {
@@ -26,6 +28,8 @@ const tema = {
   },
 };
 
+
+//crear un navegador y exportarlo para usarlo en la app
 function Navegador() {
   const { usuario, cargando } = useAuth();
 
@@ -55,6 +59,8 @@ function Navegador() {
   );
 }
 
+
+//crear un layout y exportarlo para usarlo en la app
 export default function RootLayout() {
   useEffect(() => {
     void configurarManejadorNotificaciones();

@@ -6,6 +6,8 @@ import { almacenamiento } from '@/services/storage';
 import type { Habito, NuevoHabito } from '@/types';
 import { clavePeriodoActual } from '@/utils/validation';
 
+//crear un contexto
+
 type HabitsContextValue = {
   habitos: Habito[];
   cargandoHabitos: boolean;
@@ -15,6 +17,7 @@ type HabitsContextValue = {
 };
 
 const HabitsContext = createContext<HabitsContextValue | null>(null);
+
 
 export function HabitsProvider({ children }: React.PropsWithChildren) {
   const { usuario } = useAuth();

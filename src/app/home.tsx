@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useHabitos } from '@/context/HabitsContext';
 import { estaRealizadoEnPeriodoActual } from '@/utils/validation';
 
+//pantalla principal de la app
 export default function HomeScreen() {
   const { usuario, cerrarSesion } = useAuth();
   const { habitos, cargandoHabitos, alternarHabito, eliminarHabito } = useHabitos();
@@ -26,6 +27,7 @@ export default function HomeScreen() {
 
   if (cargandoHabitos) return <LoadingScreen />;
 
+  //mostrar la pantalla principal de la app
   return (
     <SafeAreaView edges={['top']} style={styles.pantalla}>
       <FlatList
@@ -82,6 +84,8 @@ export default function HomeScreen() {
   );
 }
 
+
+//exportar los estilos para usarlo en la app
 const styles = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colores.fondo },
   contenido: { padding: 20, paddingBottom: 110 },

@@ -4,6 +4,8 @@ import { almacenamiento } from '@/services/storage';
 import type { ResultadoAutenticacion } from '@/types';
 import { normalizarUsuario, validarCredenciales } from '@/utils/validation';
 
+//crear un contexto
+
 type AuthContextValue = {
   usuario: string | null;
   cargando: boolean;
@@ -14,6 +16,8 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+
+//crear un provider para el contexto y exportarlo.
 export function AuthProvider({ children }: React.PropsWithChildren) {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);

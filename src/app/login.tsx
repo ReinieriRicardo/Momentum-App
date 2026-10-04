@@ -15,6 +15,8 @@ import { FormField } from '@/components/FormField';
 import { colores } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 
+
+//pantalla de inicio de sesion
 export default function LoginScreen() {
   const { iniciarSesion } = useAuth();
   const [usuario, setUsuario] = useState('');
@@ -22,6 +24,8 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+
+  //manejador para iniciar sesion
   async function enviar() {
     setError('');
     setEnviando(true);

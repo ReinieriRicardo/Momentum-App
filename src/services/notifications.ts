@@ -1,3 +1,11 @@
+import { AndroidImportance } from 'expo-notifications/build/NotificationChannelManager.types';
+import { getPermissionsAsync, requestPermissionsAsync } from 'expo-notifications/build/NotificationPermissions';
+import { SchedulableTriggerInputTypes } from 'expo-notifications/build/Notifications.types';
+import type { NotificationTriggerInput } from 'expo-notifications/build/Notifications.types';
+import { setNotificationHandler } from 'expo-notifications/build/NotificationsHandler';
+import { cancelScheduledNotificationAsync } from 'expo-notifications/build/cancelScheduledNotificationAsync';
+import { scheduleNotificationAsync } from 'expo-notifications/build/scheduleNotificationAsync';
+import { setNotificationChannelAsync } from 'expo-notifications/build/setNotificationChannelAsync';
 import { isRunningInExpoGo } from 'expo';
 import { Platform } from 'react-native';
 
@@ -5,26 +13,13 @@ import type { FrecuenciaHabito } from '@/types';
 import { interpretarHora } from '@/utils/validation';
 
 const CANAL_HABITOS = 'habitos';
-type ModuloNotificaciones = typeof import('expo-notifications');
 
-let cargaNotificaciones: Promise<ModuloNotificaciones> | null = null;
-
-export function esExpoGoAndroid() {
-  return Platform.OS === 'android' && isRunningInExpoGo();
-}
-
-async function obtenerNotificaciones() {
-  if (esExpoGoAndroid()) return null;
-
-  cargaNotificaciones ??= import('expo-notifications');
-  return cargaNotificaciones;
+function usaCanalPropio() {
+  return Platform.OS === 'android' && !isRunningInExpoGo();
 }
 
 export async function configurarManejadorNotificaciones() {
-  const Notifications = await obtenerNotificaciones();
-  if (!Notifications) return;
-
-  Notifications.setNotificationHandler({
+  setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: true,
       shouldSetBadge: false,
@@ -35,25 +30,22 @@ export async function configurarManejadorNotificaciones() {
 }
 
 export async function prepararNotificaciones() {
-  const Notifications = await obtenerNotificaciones();
-  if (!Notifications) return false;
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync(CANAL_HABITOS, {
+  if (usaCanalPropio()) {
+    await setNotificationChannelAsync(CANAL_HABITOS, {
       name: 'Recordatorios de hábitos',
       description: 'Avisos para mantener tus hábitos al día.',
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 200, 250],
       lightColor: '#6D5EF7',
     });
   }
 
-  const permisoActual = await Notifications.getPermissionsAsync();
+  const permisoActual = await getPermissionsAsync();
   if (permisoActual.status === 'granted') {
     return true;
   }
 
-  const permisoSolicitado = await Notifications.requestPermissionsAsync();
+  const permisoSolicitado = await requestPermissionsAsync();
   return permisoSolicitado.status === 'granted';
 }
 
@@ -67,28 +59,28 @@ export async function programarRecordatorioHabito(
     return null;
   }
 
-  const Notifications = await obtenerNotificaciones();
   const horario = interpretarHora(horaRecordatorio);
-  if (!Notifications || !horario) return null;
+  if (!horario) return null;
 
   const diaSemana = frecuencia === 'Semanal' ? new Date().getDay() + 1 : undefined;
-  const trigger =
+  const canal = usaCanalPropio() ? { channelId: CANAL_HABITOS } : {};
+  const trigger: NotificationTriggerInput =
     frecuencia === 'Diario'
       ? {
-          type: Notifications.SchedulableTriggerInputTypes.DAILY,
+          type: SchedulableTriggerInputTypes.DAILY,
           hour: horario.hora,
           minute: horario.minuto,
-          channelId: CANAL_HABITOS,
+          ...canal,
         }
       : {
-          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+          type: SchedulableTriggerInputTypes.WEEKLY,
           weekday: diaSemana!,
           hour: horario.hora,
           minute: horario.minuto,
-          channelId: CANAL_HABITOS,
+          ...canal,
         };
 
-  const id = await Notifications.scheduleNotificationAsync({
+  const id = await scheduleNotificationAsync({
     content: {
       title: '¡Momento de mantener tu impulso!',
       body: `Recordá completar: ${titulo}`,
@@ -103,6 +95,5 @@ export async function programarRecordatorioHabito(
 export async function cancelarRecordatorio(notificacionId?: string) {
   if (!notificacionId) return;
 
-  const Notifications = await obtenerNotificaciones();
-  await Notifications?.cancelScheduledNotificationAsync(notificacionId);
+  await cancelScheduledNotificationAsync(notificacionId);
 }

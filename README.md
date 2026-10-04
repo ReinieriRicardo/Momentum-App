@@ -37,7 +37,7 @@ Para abrirla desde Expo Go en un celular conectado a la misma red Wi-Fi:
 npm run start:go
 ```
 
-Escaneá el código QR con Expo Go. La gestión de hábitos funciona normalmente; en Expo Go para Android el recordatorio queda desactivado para evitar la incompatibilidad del módulo de notificaciones.
+Escaneá el código QR con Expo Go. La gestión de hábitos y los recordatorios locales diarios o semanales funcionan normalmente. Momentum carga únicamente las APIs locales compatibles para evitar el registro de notificaciones push que Expo Go no admite en Android.
 
 Con un emulador Android iniciado desde Android Studio, también se puede usar:
 
@@ -55,7 +55,7 @@ En Windows, si la compilación nativa informa que una ruta supera los 260 caract
 
 La primera vez que se crea un hábito con recordatorio, Android solicitará permiso para mostrar notificaciones. Los hábitos diarios se notifican todos los días a la hora elegida; los semanales, el mismo día de la semana en que fueron creados.
 
-La aplicación también incluye una development build porque esa es la modalidad usada para evaluar los recordatorios en Android. Para esa prueba, ejecutá `npm start` o `npm run android`; para el resto de la aplicación en Expo Go, ejecutá `npm run start:go`.
+La aplicación también incluye una development build para probarla como aplicación nativa independiente. Ejecutá `npm start` o `npm run android` para esa modalidad, y `npm run start:go` para abrirla desde Expo Go.
 
 ## Verificaciones
 

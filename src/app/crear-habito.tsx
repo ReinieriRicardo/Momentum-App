@@ -15,23 +15,24 @@ import { AppButton } from '@/components/AppButton';
 import { FormField } from '@/components/FormField';
 import { colores, radios } from '@/constants/theme';
 import { useHabitos } from '@/context/HabitsContext';
-import { esExpoGoAndroid } from '@/services/notifications';
 import { nombreDiaSemana, validarHabito } from '@/utils/validation';
 import type { FrecuenciaHabito } from '@/types';
 
+//crear un array con las frecuencias y exportarlo para usarlo en la app
 const FRECUENCIAS: FrecuenciaHabito[] = ['Diario', 'Semanal'];
 
 export default function CrearHabitoScreen() {
   const { agregarHabito } = useHabitos();
-  const recordatoriosDisponibles = !esExpoGoAndroid();
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>('Diario');
-  const [recordatorioActivo, setRecordatorioActivo] = useState(recordatoriosDisponibles);
+  const [recordatorioActivo, setRecordatorioActivo] = useState(true);
   const [horaRecordatorio, setHoraRecordatorio] = useState('09:00');
   const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
 
+
+  //crear un manejador para guardar el hábito y exportarlo para usarlo en la app
   async function guardar() {
     const mensaje = validarHabito(titulo, frecuencia, recordatorioActivo, horaRecordatorio);
     if (mensaje) {
@@ -64,6 +65,8 @@ export default function CrearHabitoScreen() {
     }
   }
 
+
+  //exportar el formulario para usarlo en la app
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -115,18 +118,15 @@ export default function CrearHabitoScreen() {
 
           <TouchableOpacity
             accessibilityRole="switch"
-            accessibilityState={{ checked: recordatorioActivo, disabled: !recordatoriosDisponibles }}
+            accessibilityState={{ checked: recordatorioActivo }}
             activeOpacity={0.8}
-            disabled={!recordatoriosDisponibles}
             onPress={() => setRecordatorioActivo((activo) => !activo)}
-            style={[styles.recordatorio, !recordatoriosDisponibles && styles.recordatorioDeshabilitado]}
+            style={styles.recordatorio}
           >
             <View style={styles.recordatorioTexto}>
               <Text style={styles.recordatorioTitulo}>Recordatorio local</Text>
               <Text style={styles.recordatorioAyuda}>
-                {recordatoriosDisponibles
-                  ? 'Se mostrará 10 segundos después de crear el hábito.'
-                  : 'En Android se prueba con la development build, no dentro de Expo Go.'}
+                Se programará según la frecuencia y la hora elegidas.
               </Text>
             </View>
             <View style={[styles.interruptor, recordatorioActivo && styles.interruptorActivo]}>
@@ -134,7 +134,7 @@ export default function CrearHabitoScreen() {
             </View>
           </TouchableOpacity>
 
-          {recordatorioActivo && recordatoriosDisponibles ? (
+          {recordatorioActivo ? (
             <View style={styles.horario}>
               <FormField
                 autoCapitalize="none"
@@ -160,6 +160,8 @@ export default function CrearHabitoScreen() {
   );
 }
 
+
+//exportar los estilos
 const styles = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colores.fondo },
   contenido: { padding: 20, gap: 22, paddingBottom: 40 },
@@ -195,7 +197,6 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 14,
   },
-  recordatorioDeshabilitado: { opacity: 0.65 },
   horario: { gap: 7 },
   horarioAyuda: { color: colores.textoSecundario, fontSize: 12, lineHeight: 17 },
   recordatorioTexto: { flex: 1, gap: 3 },

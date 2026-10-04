@@ -7,6 +7,8 @@ import { FormField } from '@/components/FormField';
 import { colores, radios } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
 
+
+//pantalla de registro
 export default function RegistroScreen() {
   const { registrar } = useAuth();
   const [usuario, setUsuario] = useState('');
@@ -15,6 +17,7 @@ export default function RegistroScreen() {
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+  //manejador para registrar un nuevo usuario
   async function enviar() {
     setError('');
     if (contrasena !== confirmacion) {
