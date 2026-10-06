@@ -68,11 +68,11 @@ npx expo-doctor
 
 Los tests se ejecutan una sola vez con `npm test` y no requieren un dispositivo conectado.
 
-<img width="807" height="235" alt="Captura de pantalla 2026-10-06 194905" src="https://github.com/user-attachments/assets/18123cba-3e2e-43b8-b0a5-8a05e7af6431" />
+<img width="807" height="235" alt="Captura de pantalla 2026-10-06 194905" src="https://github.com/user-attachments/assets/18123cba-3e2e-43b8-b0a5-8a05e7af6431" /><br>
 
-<img width="376" height="90" alt="Captura de pantalla 2026-10-06 202749" src="https://github.com/user-attachments/assets/6d08a1c2-745f-4d08-a831-f92f982d4e8d" />
+<img width="376" height="90" alt="Captura de pantalla 2026-10-06 202749" src="https://github.com/user-attachments/assets/6d08a1c2-745f-4d08-a831-f92f982d4e8d" /><br>
 
-<img width="391" height="78" alt="Captura de pantalla 2026-10-06 202836" src="https://github.com/user-attachments/assets/2a30a196-0a26-410b-b5d7-208544f9bf3e" />
+<img width="391" height="78" alt="Captura de pantalla 2026-10-06 202836" src="https://github.com/user-attachments/assets/2a30a196-0a26-410b-b5d7-208544f9bf3e" /><br>
 
 <img width="416" height="100" alt="Captura de pantalla 2026-10-06 203556" src="https://github.com/user-attachments/assets/8d984027-f0db-4df0-ba03-7c06d337a79a" />
 
