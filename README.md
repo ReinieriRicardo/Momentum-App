@@ -68,6 +68,9 @@ npx expo-doctor
 
 Los tests se ejecutan una sola vez con `npm test` y no requieren un dispositivo conectado.
 
+<img width="807" height="235" alt="Captura de pantalla 2026-10-06 194905" src="https://github.com/user-attachments/assets/18123cba-3e2e-43b8-b0a5-8a05e7af6431" />
+
+
 ## Enlace Video DEMO de la app
 
 https://www.youtube.com/shorts/F-Uuq7X-678
