@@ -74,6 +74,7 @@ Los tests se ejecutan una sola vez con `npm test` y no requieren un dispositivo 
 
 <img width="391" height="78" alt="Captura de pantalla 2026-10-06 202836" src="https://github.com/user-attachments/assets/2a30a196-0a26-410b-b5d7-208544f9bf3e" />
 
+<img width="416" height="100" alt="Captura de pantalla 2026-10-06 203556" src="https://github.com/user-attachments/assets/8d984027-f0db-4df0-ba03-7c06d337a79a" />
 
 
 
