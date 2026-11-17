@@ -5,6 +5,17 @@ export type Usuario = {
 
 export type FrecuenciaHabito = 'Diario' | 'Semanal';
 
+export type UbicacionHabito = {
+  latitud: number;
+  longitud: number;
+  direccion?: string;
+};
+
+export type ContactoAsociado = {
+  id: string;
+  nombre: string;
+};
+
 export type Habito = {
   id: string;
   propietario: string;
@@ -18,6 +29,10 @@ export type Habito = {
   diaSemanaRecordatorio?: number;
   notificacionId?: string;
   evidenciaUri?: string;
+  ubicacion?: UbicacionHabito;
+  contacto?: ContactoAsociado;
+  eventoCalendarioId?: string;
+  eventoCalendarioFecha?: string;
 };
 
 export type NuevoHabito = Pick<

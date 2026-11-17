@@ -40,6 +40,25 @@
           "cameraPermission": "Momentum necesita acceso a la cámara para tomar evidencia de tus hábitos.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Momentum usa tu ubicación actual para asociar el lugar donde realizaste un hábito."
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Momentum permite elegir un contacto para asociarlo a un hábito."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "writeOnlyAccess": true,
+          "writeOnlyCalendarPermission": "Momentum necesita permiso para agregar recordatorios de hábitos a tu calendario."
+        }
       ]
     ],
     "experiments": {

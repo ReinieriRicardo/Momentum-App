@@ -13,7 +13,16 @@ import { estaRealizadoEnPeriodoActual } from '@/utils/validation';
 //pantalla principal de la app
 export default function HomeScreen() {
   const { usuario, cerrarSesion } = useAuth();
-  const { habitos, cargandoHabitos, alternarHabito, guardarEvidencia, eliminarHabito } = useHabitos();
+  const {
+    habitos,
+    cargandoHabitos,
+    alternarHabito,
+    guardarEvidencia,
+    guardarUbicacion,
+    guardarContacto,
+    guardarEventoCalendario,
+    eliminarHabito,
+  } = useHabitos();
   const completados = habitos.filter((habito) =>
     estaRealizadoEnPeriodoActual(habito.frecuencia, habito.realizadosEn),
   ).length;
@@ -72,6 +81,9 @@ export default function HomeScreen() {
             habito={item}
             realizado={estaRealizadoEnPeriodoActual(item.frecuencia, item.realizadosEn)}
             onGuardarEvidencia={(uri) => guardarEvidencia(item.id, uri)}
+            onGuardarUbicacion={(ubicacion) => guardarUbicacion(item.id, ubicacion)}
+            onGuardarContacto={(contacto) => guardarContacto(item.id, contacto)}
+            onGuardarEventoCalendario={(eventoId, fecha) => guardarEventoCalendario(item.id, eventoId, fecha)}
             onAlternar={() => void alternarHabito(item.id)}
             onEliminar={() => confirmarEliminacion(item.id, item.titulo)}
           />

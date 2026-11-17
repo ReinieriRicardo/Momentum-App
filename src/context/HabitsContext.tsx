@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { cancelarRecordatorio, programarRecordatorioHabito } from '@/services/notifications';
 import { almacenamiento } from '@/services/storage';
-import type { Habito, NuevoHabito } from '@/types';
+import type { Habito, NuevoHabito, UbicacionHabito, ContactoAsociado } from '@/types';
 import { clavePeriodoActual } from '@/utils/validation';
 
 //crear un contexto
@@ -14,6 +14,9 @@ type HabitsContextValue = {
   agregarHabito: (datos: NuevoHabito) => Promise<{ notificacionProgramada: boolean }>;
   alternarHabito: (id: string) => Promise<void>;
   guardarEvidencia: (id: string, evidenciaUri: string) => Promise<void>;
+  guardarUbicacion: (id: string, ubicacion: UbicacionHabito) => Promise<void>;
+  guardarContacto: (id: string, contacto: ContactoAsociado) => Promise<void>;
+  guardarEventoCalendario: (id: string, eventoId: string, fecha: string) => Promise<void>;
   eliminarHabito: (id: string) => Promise<void>;
 };
 
@@ -96,6 +99,28 @@ export function HabitsProvider({ children }: React.PropsWithChildren) {
         await almacenamiento.guardarHabitos(actualizados);
         setHabitos((actuales) => actuales.map((habito) =>
           habito.id === id ? { ...habito, evidenciaUri } : habito,
+        ));
+      },
+      async guardarUbicacion(id, ubicacion) {
+        const todos = await almacenamiento.obtenerHabitos();
+        const actualizados = todos.map((habito) => habito.id === id ? { ...habito, ubicacion } : habito);
+        await almacenamiento.guardarHabitos(actualizados);
+        setHabitos((actuales) => actuales.map((habito) => habito.id === id ? { ...habito, ubicacion } : habito));
+      },
+      async guardarContacto(id, contacto) {
+        const todos = await almacenamiento.obtenerHabitos();
+        const actualizados = todos.map((habito) => habito.id === id ? { ...habito, contacto } : habito);
+        await almacenamiento.guardarHabitos(actualizados);
+        setHabitos((actuales) => actuales.map((habito) => habito.id === id ? { ...habito, contacto } : habito));
+      },
+      async guardarEventoCalendario(id, eventoId, fecha) {
+        const todos = await almacenamiento.obtenerHabitos();
+        const actualizados = todos.map((habito) =>
+          habito.id === id ? { ...habito, eventoCalendarioId: eventoId, eventoCalendarioFecha: fecha } : habito,
+        );
+        await almacenamiento.guardarHabitos(actualizados);
+        setHabitos((actuales) => actuales.map((habito) =>
+          habito.id === id ? { ...habito, eventoCalendarioId: eventoId, eventoCalendarioFecha: fecha } : habito,
         ));
       },
       async eliminarHabito(id) {

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import { colores, radios } from '@/constants/theme';
-import type { Habito } from '@/types';
+import type { ContactoAsociado, Habito, UbicacionHabito } from '@/types';
+import { PermisoDispositivoRechazado, crearEventoCalendarioHabito, obtenerUbicacionActual, seleccionarContacto } from '@/services/deviceResources';
 import { nombreDiaSemana } from '@/utils/validation';
 
 type HabitItemProps = {
@@ -12,10 +13,14 @@ type HabitItemProps = {
   onAlternar: () => void;
   onEliminar: () => void;
   onGuardarEvidencia?: (uri: string) => Promise<void>;
+  onGuardarUbicacion?: (ubicacion: UbicacionHabito) => Promise<void>;
+  onGuardarContacto?: (contacto: ContactoAsociado) => Promise<void>;
+  onGuardarEventoCalendario?: (eventoId: string, fecha: string) => Promise<void>;
 };
 
-export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardarEvidencia }: HabitItemProps) {
+export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardarEvidencia, onGuardarUbicacion, onGuardarContacto, onGuardarEventoCalendario }: HabitItemProps) {
   const [seleccionandoFoto, setSeleccionandoFoto] = useState(false);
+  const [recursoPendiente, setRecursoPendiente] = useState<'ubicacion' | 'contacto' | 'calendario' | null>(null);
   const detalleRecordatorio = habito.horaRecordatorio
     ? habito.frecuencia === 'Diario'
       ? `Todos los días a las ${habito.horaRecordatorio}`
@@ -53,6 +58,56 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
     }
   }
 
+  function mostrarErrorDispositivo(error: unknown, recurso: string) {
+    if (error instanceof PermisoDispositivoRechazado) {
+      Alert.alert(
+        'Permiso rechazado',
+        error.puedeVolverAPedir
+          ? `Momentum necesita permiso para usar ${error.recurso}. Podés volver a intentarlo cuando quieras.`
+          : `El permiso para usar ${error.recurso} está desactivado. Habilitalo desde la configuración del dispositivo.`,
+      );
+      return;
+    }
+    Alert.alert(`No se pudo usar ${recurso}`, error instanceof Error ? error.message : 'Intentá nuevamente.');
+  }
+
+  async function guardarUbicacionActual() {
+    setRecursoPendiente('ubicacion');
+    try {
+      const ubicacion = await obtenerUbicacionActual();
+      if (onGuardarUbicacion) await onGuardarUbicacion(ubicacion);
+    } catch (error) {
+      mostrarErrorDispositivo(error, 'la ubicación');
+    } finally {
+      setRecursoPendiente(null);
+    }
+  }
+
+  async function vincularContacto() {
+    setRecursoPendiente('contacto');
+    try {
+      const contacto = await seleccionarContacto();
+      if (contacto && onGuardarContacto) await onGuardarContacto(contacto);
+    } catch (error) {
+      mostrarErrorDispositivo(error, 'los contactos');
+    } finally {
+      setRecursoPendiente(null);
+    }
+  }
+
+  async function agendarEnCalendario() {
+    setRecursoPendiente('calendario');
+    try {
+      const evento = await crearEventoCalendarioHabito(habito);
+      if (onGuardarEventoCalendario) await onGuardarEventoCalendario(evento.id, evento.fecha.toISOString());
+      Alert.alert('Evento creado', `Se agregó “Hábito: ${habito.titulo}” al calendario para el ${evento.fecha.toLocaleString()}.`);
+    } catch (error) {
+      mostrarErrorDispositivo(error, 'el calendario');
+    } finally {
+      setRecursoPendiente(null);
+    }
+  }
+
   return (
     <View style={[styles.tarjeta, realizado && styles.tarjetaCompletada]}>
       <TouchableOpacity
@@ -86,6 +141,38 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
             </TouchableOpacity>
             <TouchableOpacity accessibilityRole="button" disabled={seleccionandoFoto} onPress={() => void seleccionarFoto('galeria')} style={styles.botonFoto}>
               <Text style={styles.textoBotonFoto}>▧ Elegir de galería</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {habito.ubicacion ? (
+          <View style={styles.datoDispositivo}>
+            <Text style={styles.datoTexto}>📍 {habito.ubicacion.direccion || `${habito.ubicacion.latitud.toFixed(5)}, ${habito.ubicacion.longitud.toFixed(5)}`}</Text>
+            <TouchableOpacity accessibilityRole="link" onPress={() => void Linking.openURL(`https://maps.google.com/?q=${habito.ubicacion?.latitud},${habito.ubicacion?.longitud}`)}>
+              <Text style={styles.enlace}>Ver mapa</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+        {habito.contacto ? <Text style={styles.datoTexto}>👤 Contacto: {habito.contacto.nombre}</Text> : null}
+        {habito.eventoCalendarioFecha ? (
+          <Text style={styles.datoTexto}>🗓️ En calendario: {new Date(habito.eventoCalendarioFecha).toLocaleString()}</Text>
+        ) : null}
+        {recursoPendiente ? (
+          <View style={styles.cargandoFoto}>
+            <ActivityIndicator color={colores.primario} size="small" />
+            <Text style={styles.ayudaFoto}>
+              {recursoPendiente === 'ubicacion' ? 'Obteniendo ubicación…' : recursoPendiente === 'contacto' ? 'Abriendo contactos…' : 'Creando evento…'}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.accionesFoto}>
+            <TouchableOpacity accessibilityRole="button" onPress={() => void guardarUbicacionActual()} style={styles.botonFoto}>
+              <Text style={styles.textoBotonFoto}>📍 {habito.ubicacion ? 'Actualizar ubicación' : 'Guardar ubicación'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" onPress={() => void vincularContacto()} style={styles.botonFoto}>
+              <Text style={styles.textoBotonFoto}>👤 {habito.contacto ? 'Cambiar contacto' : 'Asociar contacto'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" disabled={Boolean(habito.eventoCalendarioId)} onPress={() => void agendarEnCalendario()} style={[styles.botonFoto, Boolean(habito.eventoCalendarioId) && styles.botonDesactivado]}>
+              <Text style={styles.textoBotonFoto}>{habito.eventoCalendarioId ? '✓ Evento creado' : '🗓️ Crear evento'}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -139,6 +226,10 @@ const styles = StyleSheet.create({
   textoBotonFoto: { color: colores.primarioOscuro, fontSize: 11, fontWeight: '700' },
   cargandoFoto: { alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 8 },
   ayudaFoto: { color: colores.textoSecundario, fontSize: 12 },
+  datoDispositivo: { alignItems: 'flex-start', gap: 4, marginTop: 3 },
+  datoTexto: { color: colores.textoSecundario, fontSize: 12, lineHeight: 18, marginTop: 4 },
+  enlace: { color: colores.primarioOscuro, fontSize: 12, fontWeight: '700' },
+  botonDesactivado: { opacity: 0.6 },
   recordatorio: { color: colores.advertencia, fontSize: 12, marginTop: 3 },
   eliminar: { alignSelf: 'flex-start', paddingVertical: 4 },
   eliminarTexto: { color: colores.peligro, fontSize: 13, fontWeight: '700' },
