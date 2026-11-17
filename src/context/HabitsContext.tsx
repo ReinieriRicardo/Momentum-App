@@ -13,6 +13,7 @@ type HabitsContextValue = {
   cargandoHabitos: boolean;
   agregarHabito: (datos: NuevoHabito) => Promise<{ notificacionProgramada: boolean }>;
   alternarHabito: (id: string) => Promise<void>;
+  guardarEvidencia: (id: string, evidenciaUri: string) => Promise<void>;
   eliminarHabito: (id: string) => Promise<void>;
 };
 
@@ -86,6 +87,16 @@ export function HabitsProvider({ children }: React.PropsWithChildren) {
         const actualizados = todos.map(alternar);
         await almacenamiento.guardarHabitos(actualizados);
         setHabitos((actuales) => actuales.map(alternar));
+      },
+      async guardarEvidencia(id, evidenciaUri) {
+        const todos = await almacenamiento.obtenerHabitos();
+        const actualizados = todos.map((habito) =>
+          habito.id === id ? { ...habito, evidenciaUri } : habito,
+        );
+        await almacenamiento.guardarHabitos(actualizados);
+        setHabitos((actuales) => actuales.map((habito) =>
+          habito.id === id ? { ...habito, evidenciaUri } : habito,
+        ));
       },
       async eliminarHabito(id) {
         const todos = await almacenamiento.obtenerHabitos();

@@ -17,6 +17,7 @@ export type Habito = {
   horaRecordatorio?: string;
   diaSemanaRecordatorio?: number;
   notificacionId?: string;
+  evidenciaUri?: string;
 };
 
 export type NuevoHabito = Pick<

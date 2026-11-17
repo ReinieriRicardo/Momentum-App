@@ -32,6 +32,14 @@
           "color": "#6D5EF7",
           "defaultChannel": "habitos"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Momentum necesita acceso a tus fotos para adjuntar evidencia a tus hábitos.",
+          "cameraPermission": "Momentum necesita acceso a la cámara para tomar evidencia de tus hábitos.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
