@@ -5,12 +5,12 @@ import { router } from 'expo-router';
 import { AppButton } from '@/components/AppButton';
 import { FormField } from '@/components/FormField';
 import { colores, radios } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 
 //pantalla de registro
 export default function RegistroScreen() {
-  const { registrar } = useAuth();
+  const registrar = useAppStore((estado) => estado.registrar);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [confirmacion, setConfirmacion] = useState('');

@@ -4,9 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { colores } from '@/constants/theme';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
-import { HabitsProvider } from '@/context/HabitsContext';
 import { configurarManejadorNotificaciones } from '@/services/notifications';
+import { useAppStore } from '@/stores/useAppStore';
 
 
 //crear un tema y exportarlo para usarlo en la app
@@ -31,47 +30,47 @@ const tema = {
 
 //crear un navegador y exportarlo para usarlo en la app
 function Navegador() {
-  const { usuario, cargando } = useAuth();
+  const usuario = useAppStore((estado) => estado.usuario);
+  const cargandoSesion = useAppStore((estado) => estado.cargandoSesion);
 
-  if (cargando) return <LoadingScreen />;
+  if (cargandoSesion) return <LoadingScreen />;
 
   return (
-    <HabitsProvider>
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colores.superficie },
-          headerTintColor: colores.texto,
-          headerTitleStyle: { fontWeight: '800' },
-          contentStyle: { backgroundColor: colores.fondo },
-        }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Protected guard={!usuario}>
-          <Stack.Screen name="login" options={{ headerShown: false, title: 'Iniciar sesión' }} />
-          <Stack.Screen name="registro" options={{ title: 'Crear cuenta' }} />
-        </Stack.Protected>
-        <Stack.Protected guard={Boolean(usuario)}>
-          <Stack.Screen name="home" options={{ headerShown: false, title: 'Mis hábitos' }} />
-          <Stack.Screen name="crear-habito" options={{ title: 'Nuevo hábito' }} />
-        </Stack.Protected>
-      </Stack>
-    </HabitsProvider>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: colores.superficie },
+        headerTintColor: colores.texto,
+        headerTitleStyle: { fontWeight: '800' },
+        contentStyle: { backgroundColor: colores.fondo },
+      }}
+    >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Protected guard={!usuario}>
+        <Stack.Screen name="login" options={{ headerShown: false, title: 'Iniciar sesión' }} />
+        <Stack.Screen name="registro" options={{ title: 'Crear cuenta' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={Boolean(usuario)}>
+        <Stack.Screen name="home" options={{ headerShown: false, title: 'Mis hábitos' }} />
+        <Stack.Screen name="crear-habito" options={{ title: 'Nuevo hábito' }} />
+      </Stack.Protected>
+    </Stack>
   );
 }
 
 
 //crear un layout y exportarlo para usarlo en la app
 export default function RootLayout() {
+  const inicializarSesion = useAppStore((estado) => estado.inicializarSesion);
+
   useEffect(() => {
     void configurarManejadorNotificaciones();
-  }, []);
+    void inicializarSesion();
+  }, [inicializarSesion]);
 
   return (
-    <AuthProvider>
-      <ThemeProvider value={tema}>
-        <StatusBar style="dark" />
-        <Navegador />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider value={tema}>
+      <StatusBar style="dark" />
+      <Navegador />
+    </ThemeProvider>
   );
 }

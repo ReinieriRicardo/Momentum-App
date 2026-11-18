@@ -14,7 +14,7 @@ import { router } from 'expo-router';
 import { AppButton } from '@/components/AppButton';
 import { FormField } from '@/components/FormField';
 import { colores, radios } from '@/constants/theme';
-import { useHabitos } from '@/context/HabitsContext';
+import { useAppStore } from '@/stores/useAppStore';
 import { nombreDiaSemana, validarHabito } from '@/utils/validation';
 import type { FrecuenciaHabito } from '@/types';
 
@@ -22,7 +22,7 @@ import type { FrecuenciaHabito } from '@/types';
 const FRECUENCIAS: FrecuenciaHabito[] = ['Diario', 'Semanal'];
 
 export default function CrearHabitoScreen() {
-  const { agregarHabito } = useHabitos();
+  const agregarHabito = useAppStore((estado) => estado.agregarHabito);
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [frecuencia, setFrecuencia] = useState<FrecuenciaHabito>('Diario');

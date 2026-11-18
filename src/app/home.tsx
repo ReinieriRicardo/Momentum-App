@@ -1,4 +1,4 @@
-import { Alert, Button, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Button, FlatList, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,33 +6,18 @@ import { AppButton } from '@/components/AppButton';
 import { HabitItem } from '@/components/HabitItem';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { colores, radios } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import { useHabitos } from '@/context/HabitsContext';
+import { useAppStore } from '@/stores/useAppStore';
 import { estaRealizadoEnPeriodoActual } from '@/utils/validation';
 
 //pantalla principal de la app
 export default function HomeScreen() {
-  const { usuario, cerrarSesion } = useAuth();
-  const {
-    habitos,
-    cargandoHabitos,
-    alternarHabito,
-    guardarEvidencia,
-    guardarUbicacion,
-    guardarContacto,
-    guardarEventoCalendario,
-    eliminarHabito,
-  } = useHabitos();
+  const usuario = useAppStore((estado) => estado.usuario);
+  const cerrarSesion = useAppStore((estado) => estado.cerrarSesion);
+  const habitos = useAppStore((estado) => estado.habitos);
+  const cargandoHabitos = useAppStore((estado) => estado.cargandoHabitos);
   const completados = habitos.filter((habito) =>
     estaRealizadoEnPeriodoActual(habito.frecuencia, habito.realizadosEn),
   ).length;
-
-  function confirmarEliminacion(id: string, titulo: string) {
-    Alert.alert('Eliminar hábito', `¿Querés eliminar “${titulo}”?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: () => void eliminarHabito(id) },
-    ]);
-  }
 
   if (cargandoHabitos) return <LoadingScreen />;
 
@@ -80,12 +65,6 @@ export default function HomeScreen() {
           <HabitItem
             habito={item}
             realizado={estaRealizadoEnPeriodoActual(item.frecuencia, item.realizadosEn)}
-            onGuardarEvidencia={(uri) => guardarEvidencia(item.id, uri)}
-            onGuardarUbicacion={(ubicacion) => guardarUbicacion(item.id, ubicacion)}
-            onGuardarContacto={(contacto) => guardarContacto(item.id, contacto)}
-            onGuardarEventoCalendario={(eventoId, fecha) => guardarEventoCalendario(item.id, eventoId, fecha)}
-            onAlternar={() => void alternarHabito(item.id)}
-            onEliminar={() => confirmarEliminacion(item.id, item.titulo)}
           />
         )}
       />

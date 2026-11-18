@@ -1,10 +1,10 @@
 import { Redirect } from 'expo-router';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 
 //pantalla principal de la app
 export default function IndexScreen() {
-  const { usuario } = useAuth();
+  const usuario = useAppStore((estado) => estado.usuario);
   return <Redirect href={usuario ? '/home' : '/login'} />;
 }

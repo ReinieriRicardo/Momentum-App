@@ -3,22 +3,23 @@ import { ActivityIndicator, Alert, Image, Linking, Platform, StyleSheet, Text, T
 import * as ImagePicker from 'expo-image-picker';
 
 import { colores, radios } from '@/constants/theme';
-import type { ContactoAsociado, Habito, UbicacionHabito } from '@/types';
+import type { Habito } from '@/types';
 import { PermisoDispositivoRechazado, crearEventoCalendarioHabito, obtenerUbicacionActual, seleccionarContacto } from '@/services/deviceResources';
+import { useAppStore } from '@/stores/useAppStore';
 import { nombreDiaSemana } from '@/utils/validation';
 
 type HabitItemProps = {
   habito: Habito;
   realizado: boolean;
-  onAlternar: () => void;
-  onEliminar: () => void;
-  onGuardarEvidencia?: (uri: string) => Promise<void>;
-  onGuardarUbicacion?: (ubicacion: UbicacionHabito) => Promise<void>;
-  onGuardarContacto?: (contacto: ContactoAsociado) => Promise<void>;
-  onGuardarEventoCalendario?: (eventoId: string, fecha: string) => Promise<void>;
 };
 
-export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardarEvidencia, onGuardarUbicacion, onGuardarContacto, onGuardarEventoCalendario }: HabitItemProps) {
+export function HabitItem({ habito, realizado }: HabitItemProps) {
+  const alternarHabito = useAppStore((estado) => estado.alternarHabito);
+  const eliminarHabito = useAppStore((estado) => estado.eliminarHabito);
+  const guardarEvidencia = useAppStore((estado) => estado.guardarEvidencia);
+  const guardarUbicacion = useAppStore((estado) => estado.guardarUbicacion);
+  const guardarContacto = useAppStore((estado) => estado.guardarContacto);
+  const guardarEventoCalendario = useAppStore((estado) => estado.guardarEventoCalendario);
   const [seleccionandoFoto, setSeleccionandoFoto] = useState(false);
   const [recursoPendiente, setRecursoPendiente] = useState<'ubicacion' | 'contacto' | 'calendario' | null>(null);
   const detalleRecordatorio = habito.horaRecordatorio
@@ -50,7 +51,7 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
         ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.75 })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, quality: 0.75 });
       const uri = resultado.canceled ? undefined : resultado.assets[0]?.uri;
-      if (uri && onGuardarEvidencia) await onGuardarEvidencia(uri);
+      if (uri) await guardarEvidencia(habito.id, uri);
     } catch {
       Alert.alert('No se pudo cargar la foto', 'Intentá nuevamente desde la cámara o la galería.');
     } finally {
@@ -75,7 +76,7 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
     setRecursoPendiente('ubicacion');
     try {
       const ubicacion = await obtenerUbicacionActual();
-      if (onGuardarUbicacion) await onGuardarUbicacion(ubicacion);
+      await guardarUbicacion(habito.id, ubicacion);
     } catch (error) {
       mostrarErrorDispositivo(error, 'la ubicación');
     } finally {
@@ -87,7 +88,7 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
     setRecursoPendiente('contacto');
     try {
       const contacto = await seleccionarContacto();
-      if (contacto && onGuardarContacto) await onGuardarContacto(contacto);
+      if (contacto) await guardarContacto(habito.id, contacto);
     } catch (error) {
       mostrarErrorDispositivo(error, 'los contactos');
     } finally {
@@ -99,7 +100,7 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
     setRecursoPendiente('calendario');
     try {
       const evento = await crearEventoCalendarioHabito(habito);
-      if (onGuardarEventoCalendario) await onGuardarEventoCalendario(evento.id, evento.fecha.toISOString());
+      await guardarEventoCalendario(habito.id, evento.id, evento.fecha.toISOString());
       Alert.alert('Evento creado', `Se agregó “Hábito: ${habito.titulo}” al calendario para el ${evento.fecha.toLocaleString()}.`);
     } catch (error) {
       mostrarErrorDispositivo(error, 'el calendario');
@@ -108,13 +109,20 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
     }
   }
 
+  function confirmarEliminacion() {
+    Alert.alert('Eliminar hábito', `¿Querés eliminar “${habito.titulo}”?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Eliminar', style: 'destructive', onPress: () => void eliminarHabito(habito.id) },
+    ]);
+  }
+
   return (
     <View style={[styles.tarjeta, realizado && styles.tarjetaCompletada]}>
       <TouchableOpacity
         accessibilityLabel={realizado ? 'Marcar como pendiente' : 'Marcar como realizado'}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: realizado }}
-        onPress={onAlternar}
+        onPress={() => void alternarHabito(habito.id)}
         style={[styles.check, realizado && styles.checkActivo]}
       >
         <Text style={styles.checkTexto}>{realizado ? '✓' : ''}</Text>
@@ -184,7 +192,7 @@ export function HabitItem({ habito, realizado, onAlternar, onEliminar, onGuardar
       <TouchableOpacity
         accessibilityLabel={`Eliminar ${habito.titulo}`}
         accessibilityRole="button"
-        onPress={onEliminar}
+        onPress={confirmarEliminacion}
         style={styles.eliminar}
       >
         <Text style={styles.eliminarTexto}>Eliminar</Text>

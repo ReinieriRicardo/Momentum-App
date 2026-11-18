@@ -13,12 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/AppButton';
 import { FormField } from '@/components/FormField';
 import { colores } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
+import { useAppStore } from '@/stores/useAppStore';
 
 
 //pantalla de inicio de sesion
 export default function LoginScreen() {
-  const { iniciarSesion } = useAuth();
+  const iniciarSesion = useAppStore((estado) => estado.iniciarSesion);
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
